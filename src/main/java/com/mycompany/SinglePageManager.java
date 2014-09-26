@@ -12,8 +12,10 @@ import org.apache.wicket.page.IPageManager;
 import org.apache.wicket.page.IPageManagerContext;
 import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.component.IRequestablePage;
+import org.apache.wicket.request.cycle.PageRequestHandlerTracker;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.util.lang.Args;
 
 /**
  *
@@ -26,8 +28,8 @@ public class SinglePageManager implements IPageManager, IPageFactory
 	private final ConcurrentMap<Class<? extends IManageablePage>, Integer> map = new ConcurrentHashMap<>();
 
 	public SinglePageManager(IPageManager manager, IPageFactory factory) {
-		this.manager = manager;
-		this.factory = factory;
+		this.manager = Args.notNull(manager, "manager");
+		this.factory = Args.notNull(factory, "factory");
 	}
 
 	@Override
@@ -40,10 +42,10 @@ public class SinglePageManager implements IPageManager, IPageFactory
 	public IManageablePage getPage(int id) throws CouldNotLockPageException
 	{
 		RequestCycle cycle = RequestCycle.get();
-		IRequestHandler activeRequestHandler = cycle.getActiveRequestHandler();
-		if (activeRequestHandler instanceof IPageClassRequestHandler)
+		IRequestHandler requestHandler = PageRequestHandlerTracker.getFirstHandler(cycle);
+		if (requestHandler instanceof IPageClassRequestHandler)
 		{
-			IPageClassRequestHandler pageClassRequestHandler = (IPageClassRequestHandler) activeRequestHandler;
+			IPageClassRequestHandler pageClassRequestHandler = (IPageClassRequestHandler) requestHandler;
 			Class<? extends IRequestablePage> pageClass = pageClassRequestHandler.getPageClass();
 			Integer pageId = map.get(pageClass);
 			if (pageId != null)

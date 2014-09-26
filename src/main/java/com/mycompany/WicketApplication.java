@@ -10,6 +10,7 @@ import org.apache.wicket.page.DefaultPageManagerContext;
 import org.apache.wicket.page.IPageManager;
 import org.apache.wicket.page.IPageManagerContext;
 import org.apache.wicket.protocol.http.WebApplication;
+import org.apache.wicket.request.cycle.PageRequestHandlerTracker;
 import org.apache.wicket.session.DefaultPageFactory;
 
 /**
@@ -33,6 +34,8 @@ public class WicketApplication extends WebApplication
 	public void init()
 	{
 		super.init();
+
+		getRequestCycleListeners().add(new PageRequestHandlerTracker());
 
 		setPageManagerProvider(new IPageManagerProvider()
 		{
@@ -60,11 +63,11 @@ public class WicketApplication extends WebApplication
 	protected IPageFactory newPageFactory()
 	{
 		IPageManagerProvider provider = new DefaultPageManagerProvider(WicketApplication.this);
-		IPageManager delegate = provider.get(new DefaultPageManagerContext());
+		IPageManager manager = provider.get(new DefaultPageManagerContext());
 
 		IPageFactory factory = new DefaultPageFactory();
 
-		managerAndFactory = new SinglePageManager(delegate, factory);
+		managerAndFactory = new SinglePageManager(manager, factory);
 		return managerAndFactory;
 	}
 }
